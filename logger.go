@@ -260,7 +260,7 @@ func (lv *level) parser(format string) string {
 	if fileFind == "" {
 		fileFind = "%{file"
 	}
-	pc := make([]uintptr, 5)
+	pc := make([]uintptr, 6)
 	runtime.Callers(4, pc)
 	frames := runtime.CallersFrames(pc)
 	trace := []string{}
