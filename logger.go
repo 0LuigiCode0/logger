@@ -33,35 +33,35 @@ func InitLogger(pathFile string) *Logger {
 	logI.level = "INFO"
 	logI.color = 251
 	logI.backColor = 233
-	logI.format = logI.initForm("%{color:b}%{color:f}%{color}    %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE [ %{file:1} ] MSG %{color:r}\"%{message}\"")
+	logI.format = logI.initForm("%{color:b}%{color:f}%{color}    %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
 	logI.formatFile = logI.initForm("   %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logS := new(level)
 	logS.level = "SERVICE"
 	logS.color = 86
 	logS.backColor = 96
-	logS.format = logS.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE [ %{file:1} ] MSG %{color:r}\"%{message}\"")
+	logS.format = logS.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
 	logS.formatFile = logS.initForm("%{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logW := new(level)
 	logW.level = "WARNING"
 	logW.color = 226
 	logW.backColor = 239
-	logW.format = logW.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE [ %{file:1} ] MSG %{color:r}\"%{message}\"")
+	logW.format = logW.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
 	logW.formatFile = logW.initForm("%{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logE := new(level)
 	logE.level = "ERROR"
 	logE.color = 9
 	logE.backColor = 188
-	logE.format = logE.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE [ %{file} ] MSG %{color:r}\"%{message}\"")
+	logE.format = logE.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{color:r}\"%{message}\"")
 	logE.formatFile = logE.initForm("  %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file} MSG %{message}")
 
 	logF := new(level)
 	logF.level = "FATAL"
 	logF.color = 128
 	logF.backColor = 215
-	logF.format = logF.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE [ %{file} ] MSG %{color:r}\"%{message}\"")
+	logF.format = logF.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{color:r}\"%{message}\"")
 	logF.formatFile = logF.initForm("  %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file} MSG %{message}")
 
 	Log.logs["info"] = logI
@@ -229,16 +229,16 @@ func (l *Logger) SetFile(file *os.File) {
 }
 
 func (lv *level) initForm(format string) string {
-	color := "\x1b[38;5;" + fmt.Sprint(lv.color) + "m"
-	colorF := "\x1b[48;5;" + fmt.Sprint(lv.backColor) + "m"
+	color := "\033[38;5;" + fmt.Sprint(lv.color) + "m"
+	colorF := "\033[48;5;" + fmt.Sprint(lv.backColor) + "m"
 	format = strings.ReplaceAll(format, "%{message}", "%v")
 	format = strings.ReplaceAll(format, "%{level}", lv.level)
 	format = strings.ReplaceAll(format, "%{color}", color)
 	format = strings.ReplaceAll(format, "%{color:f}", colorF)
-	format = strings.ReplaceAll(format, "%{color:rf}", "\x1b[49m")
-	format = strings.ReplaceAll(format, "%{color:rb}", "\x1b[22m")
-	format = strings.ReplaceAll(format, "%{color:r}", "\x1b[0m")
-	format = strings.ReplaceAll(format, "%{color:b}", "\x1b[1m")
+	format = strings.ReplaceAll(format, "%{color:rf}", "\033[49m")
+	format = strings.ReplaceAll(format, "%{color:rb}", "\033[22m")
+	format = strings.ReplaceAll(format, "%{color:r}", "\033[0m")
+	format = strings.ReplaceAll(format, "%{color:b}", "\033[1m")
 	return format
 }
 
@@ -260,7 +260,7 @@ func (lv *level) parser(format string) string {
 	if fileFind == "" {
 		fileFind = "%{file"
 	}
-	pc := make([]uintptr, 3)
+	pc := make([]uintptr, 5)
 	runtime.Callers(4, pc)
 	frames := runtime.CallersFrames(pc)
 	trace := []string{}
@@ -274,10 +274,13 @@ func (lv *level) parser(format string) string {
 		} else {
 			frame = f.File
 		}
-		trace = append(trace, fmt.Sprintf("%v:%v (%v)", frame, fmt.Sprint(f.Line), regexp.MustCompile(`[^\.]*$`).FindString(f.Function)))
+		funcName := regexp.MustCompile(`[^\.]*$`).FindString(f.Function)
+		trace = append(trace, fmt.Sprintf("%v:%v (%v)", frame, fmt.Sprint(f.Line), funcName))
+		if funcName == "main" {
+			break
+		}
 	}
 	format = strings.ReplaceAll(format, dateFind+"}", tForm)
-	format = strings.ReplaceAll(format, fileFind+"}", strings.Join(trace, " <- "))
-
+	format = strings.ReplaceAll(format, fileFind+"}", strings.Join(trace, "\n\t⮴ "))
 	return format
 }
