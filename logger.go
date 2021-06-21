@@ -10,28 +10,6 @@ import (
 	"time"
 )
 
-const (
-	black = iota
-	red
-	green
-	yellow
-	blue
-	purple
-	cyan
-	white
-)
-
-const (
-	fBlack = iota
-	fRed
-	fGreen
-	fYellow
-	fBlue
-	fPurple
-	fCyan
-	fWhite
-)
-
 //Logger класс логгера
 type Logger struct {
 	logs map[string]*level
@@ -270,7 +248,7 @@ func (lv *level) parser(format string) string {
 	regex = regexp.MustCompile("%{file[^{}]+")
 	fileFind := regex.FindString(format)
 	dateForm := strings.TrimPrefix(dateFind, "%{time:")
-	fileCalldeph, _ := strconv.ParseInt(strings.TrimPrefix(fileFind, "%{file:"), 10, 64)
+	fileCalldeph, _ := strconv.Atoi(strings.TrimPrefix(fileFind, "%{file:"))
 	t := time.Now()
 	tForm := t.Format("01 02 2006:04:05.000000")
 	if dateForm != "" {
@@ -279,21 +257,27 @@ func (lv *level) parser(format string) string {
 	if dateFind == "" {
 		dateFind = "%{time"
 	}
-	_, file, line, ok := runtime.Caller(3)
-	if ok {
-		arrHistrF := strings.Split(file, "/")
-		if fileCalldeph > 0 && fileCalldeph < int64(len(arrHistrF)) {
-			file = ""
-			for i := 1; int64(i) <= fileCalldeph; i++ {
-				file = "/" + arrHistrF[len(arrHistrF)-i] + file
-			}
-		}
-	}
 	if fileFind == "" {
 		fileFind = "%{file"
 	}
-	file += ":" + fmt.Sprint(line)
+	pc := make([]uintptr, 3)
+	runtime.Callers(4, pc)
+	frames := runtime.CallersFrames(pc)
+	trace := []string{}
+	for f, b := frames.Next(); b; f, b = frames.Next() {
+		frame := ""
+		arrHistrF := strings.Split(f.File, "/")
+		if fileCalldeph > 0 && fileCalldeph < len(arrHistrF) {
+			for i := 1; i <= fileCalldeph; i++ {
+				frame += "/" + arrHistrF[len(arrHistrF)-i]
+			}
+		} else {
+			frame = f.File
+		}
+		trace = append(trace, fmt.Sprintf("%v:%v (%v)", frame, fmt.Sprint(f.Line), regexp.MustCompile(`[^\.]*$`).FindString(f.Function)))
+	}
 	format = strings.ReplaceAll(format, dateFind+"}", tForm)
-	format = strings.ReplaceAll(format, fileFind+"}", file)
+	format = strings.ReplaceAll(format, fileFind+"}", strings.Join(trace, " <- "))
+
 	return format
 }
