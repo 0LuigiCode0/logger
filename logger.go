@@ -281,6 +281,6 @@ func (lv *level) parser(format string) string {
 		}
 	}
 	format = strings.ReplaceAll(format, dateFind+"}", tForm)
-	format = strings.ReplaceAll(format, fileFind+"}", strings.Join(trace, "\n\t⮴ "))
+	format = strings.ReplaceAll(format, fileFind+"}", strings.Join(trace, "\n\t⮤ "))
 	return format
 }
