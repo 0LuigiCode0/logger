@@ -35,7 +35,7 @@ const (
 	LFatal   levelKey = "FATAL"
 )
 
-//InitLogger иницилезирует логгер
+//InitLogger иницилезирует логгер если pathFile = "", то фаил лога не создастся
 func InitLogger(pathFile string) *Logger {
 	Log := Logger{
 		logs: make(map[levelKey]*level),
@@ -44,35 +44,35 @@ func InitLogger(pathFile string) *Logger {
 	logI.level = LInfo
 	logI.color = 251
 	logI.backColor = 233
-	logI.format = logI.initForm("%{color:b}%{color:f}%{color}    %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
+	logI.format = logI.initForm("%{font:b}%{color:f}%{color:b}    %{level} %{color:rb} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{r}\"%{message}\"")
 	logI.formatFile = logI.initForm("   %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logS := new(level)
 	logS.level = LService
 	logS.color = 86
 	logS.backColor = 96
-	logS.format = logS.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
+	logS.format = logS.initForm("%{font:b}%{color:b}%{color:f} %{level} %{color:rb} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{r}\"%{message}\"")
 	logS.formatFile = logS.initForm("%{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logW := new(level)
 	logW.level = LWarning
 	logW.color = 226
 	logW.backColor = 239
-	logW.format = logW.initForm("%{color:f}%{color:b}%{color} %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{color:r}\"%{message}\"")
+	logW.format = logW.initForm("%{font:b}%{color:b}%{color:f} %{level} %{color:rb} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file:1}\n MSG %{r}\"%{message}\"")
 	logW.formatFile = logW.initForm("%{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file:1} MSG %{message}")
 
 	logE := new(level)
 	logE.level = LError
 	logE.color = 9
 	logE.backColor = 188
-	logE.format = logE.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{color:r}\"%{message}\"")
+	logE.format = logE.initForm("%{font:b}%{color:b}%{color:f}   %{level} %{color:rb} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{r}\"%{message}\"")
 	logE.formatFile = logE.initForm("  %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file} MSG %{message}")
 
 	logF := new(level)
 	logF.level = LFatal
 	logF.color = 128
 	logF.backColor = 215
-	logF.format = logF.initForm("%{color:f}%{color:b}%{color}   %{level} %{color:rf} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{color:r}\"%{message}\"")
+	logF.format = logF.initForm("%{font:b}%{color:b}%{color:f}   %{level} %{color:rb} %{time:2006/01/02--15:04:05} >>> WHERE \n\t%{file}\n MSG %{r}\"%{message}\"")
 	logF.formatFile = logF.initForm("  %{level} %{time:2006/01/02--15:04:05} >>> WHERE %{file} MSG %{message}")
 
 	Log.logs[LInfo] = logI
@@ -99,53 +99,53 @@ func InitLogger(pathFile string) *Logger {
 
 //Infof выводит форматируемое информационное сообщение
 func (l *Logger) Infof(format string, args ...interface{}) {
-	l.logs["info"].log(format, args...)
+	l.logs[LInfo].log(format, args...)
 }
 
 //Servicef выводит форматируемое серверное сообщение
 func (l *Logger) Servicef(format string, args ...interface{}) {
-	l.logs["serv"].log(format, args...)
+	l.logs[LService].log(format, args...)
 }
 
 //Warningf выводит форматируемое предупреждающее сообщение
 func (l *Logger) Warningf(format string, args ...interface{}) {
-	l.logs["warn"].log(format, args...)
+	l.logs[LWarning].log(format, args...)
 }
 
 //Errorf выводит форматируемое сообщение ошибки
 func (l *Logger) Errorf(format string, args ...interface{}) {
-	l.logs["err"].log(format, args...)
+	l.logs[LError].log(format, args...)
 }
 
 //Fatalf выводит форматируемое критическое сообщение и завершает программу
 func (l *Logger) Fatalf(format string, args ...interface{}) {
-	l.logs["fatal"].log(format, args...)
+	l.logs[LFatal].log(format, args...)
 	os.Exit(1)
 }
 
 //Info выводит информационное сообщение
 func (l *Logger) Info(args ...interface{}) {
-	l.logs["info"].log("", args...)
+	l.logs[LInfo].log("", args...)
 }
 
 //Service выводит серверное сообщение
 func (l *Logger) Service(args ...interface{}) {
-	l.logs["serv"].log("", args...)
+	l.logs[LService].log("", args...)
 }
 
 //Warning выводит предупреждающее сообщение
 func (l *Logger) Warning(args ...interface{}) {
-	l.logs["warn"].log("", args...)
+	l.logs[LWarning].log("", args...)
 }
 
 //Error выводит сообщение ошибки
 func (l *Logger) Error(args ...interface{}) {
-	l.logs["err"].log("", args...)
+	l.logs[LError].log("", args...)
 }
 
 //Fatal выводит критическое сообщение и завершает программу
 func (l *Logger) Fatal(args ...interface{}) {
-	l.logs["fatal"].log("", args...)
+	l.logs[LFatal].log("", args...)
 	os.Exit(1)
 }
 
@@ -242,16 +242,17 @@ func (l *Logger) SetFile(file *os.File) {
 
 //initForm парсит основное форматирование уровня, заполняя управляющими байтами
 func (lv *level) initForm(format string) string {
-	color := "\033[38;5;" + fmt.Sprint(lv.color) + "m"
-	colorF := "\033[48;5;" + fmt.Sprint(lv.backColor) + "m"
+	colorF := "\033[38;5;" + fmt.Sprint(lv.color) + "m"
+	colorB := "\033[48;5;" + fmt.Sprint(lv.backColor) + "m"
 	format = strings.ReplaceAll(format, "%{message}", "%v")
 	format = strings.ReplaceAll(format, "%{level}", string(lv.level))
-	format = strings.ReplaceAll(format, "%{color}", color)
 	format = strings.ReplaceAll(format, "%{color:f}", colorF)
-	format = strings.ReplaceAll(format, "%{color:rf}", "\033[49m")
-	format = strings.ReplaceAll(format, "%{color:rb}", "\033[22m")
-	format = strings.ReplaceAll(format, "%{color:r}", "\033[0m")
-	format = strings.ReplaceAll(format, "%{color:b}", "\033[1m")
+	format = strings.ReplaceAll(format, "%{color:b}", colorB)
+	format = strings.ReplaceAll(format, "%{color:rf}", "\033[39m")
+	format = strings.ReplaceAll(format, "%{color:rb}", "\033[49m")
+	format = strings.ReplaceAll(format, "%{r}", "\033[0m")
+	format = strings.ReplaceAll(format, "%{font:b}", "\033[1m")
+	format = strings.ReplaceAll(format, "%{font:rb}", "\033[22m")
 	return format
 }
 
