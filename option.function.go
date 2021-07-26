@@ -7,7 +7,13 @@ import (
 
 func InitOptions() Options {
 	return &option{
-		opt: map[levelKey]*levelOpt{},
+		opt: map[levelKey]*levelOpt{
+			LInfo:    {},
+			LService: {},
+			LWarning: {},
+			LError:   {},
+			LFatal:   {},
+		},
 	}
 }
 
