@@ -45,7 +45,7 @@ const (
 MSG {{r}}"{{message}}"`
 	formatS = `{{font:b}}{{color:b}}{{color:f}} {{level}} {{color:rb}} {{time:2006/01/02--15:04:05}} >>> WHERE
 	{{file:1}}
-MSG {{r}"{{message}}"`
+MSG {{r}}"{{message}}"`
 	formatW = `{{font:b}}{{color:b}}{{color:f}} {{level}} {{color:rb}} {{time:2006/01/02--15:04:05}} >>> WHERE
 	{{file:1}}
 MSG {{r}}"{{message}}"`
